@@ -65,8 +65,30 @@ def add_task():
 def list_tasks():
     print("\n=== СПИСЪК ЗАДАЧИ ===")
     print("Тук ще бъдат показани всички задачи...")
-    tasks = db.all()
-    [print(f"{id}: {t}") for id, t in enumerate(tasks, start=1)]
+    what_kind_of_tasks = input(
+        "Искате ли да видите всички задачи или само незавършените? (all/notfinish/finish): "
+    ).lower()
+    if what_kind_of_tasks.lower() not in "all notfinish finish".split():
+        [
+            print(f"{id}: {t}")
+            for id, t in enumerate(
+                (db.all()),
+                start=1,
+            )
+        ]
+        return
+    mapper = {"all": [True, False], "notfinish": [False], "finish": [True]}
+    [
+        print(f"{id}: {t}")
+        for id, t in enumerate(
+            (
+                db.search(Q.completed.one_of(mapper[what_kind_of_tasks.lower()]))
+                if what_kind_of_tasks.lower() in mapper
+                else db.all()
+            ),
+            start=1,
+        )
+    ]
 
 
 def search_by_title():
@@ -96,7 +118,13 @@ def change_task_status():
 def show_statistics():
     print("\n=== СТАТИСТИКА ===")
     # TODO: Имплементирай статистика
-    pass
+    task = db.all()
+    total_tasks = len(task)
+    completed_task = len(db.search(Q.completed == True))
+    not_completed_task = total_tasks - completed_task
+    print(f"Общо задачи: {total_tasks}")
+    print(f"Завършени задачи: {completed_task}")
+    print(f"Незавършени задачи: {not_completed_task}")
 
 
 def exit_program():
