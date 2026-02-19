@@ -80,7 +80,17 @@ def search_by_title():
 def change_task_status():
     print("\n=== ПРОМЯНА НА СТАТУС ===")
     # TODO: Имплементирай промяна на статус
-    pass
+    task_id = int(input("Въведете ID на задачата, която искате да промените: "))
+    task = db.get(doc_id=task_id)
+    if not task:
+        print("Not found trask with this id {}".format(task_id))
+        return
+
+    new_status = not task["completed"]
+    try:
+        db.update({"completed": new_status}, doc_ids=[task_id])
+    except Exception as e:
+        print("Error while updating task status: {}".format(e))
 
 
 def show_statistics():
